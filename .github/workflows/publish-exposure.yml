@@ -1,0 +1,59 @@
+name: Publish bounded WHP machine exposure
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/exposure-release'
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: whp-standing-exposure-publication
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      WHP_ORIGIN: https://wheelerhubbellpublishingstandingmark.netlify.app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Verify only the new exposure relationships and frozen commitments
+        run: node --test test/exposure-boundaries.test.mjs
+      - name: Wait for connected production deployment
+        run: |
+          node --input-type=module <<'JS'
+          import {readFile,appendFile} from 'node:fs/promises';
+          const root=JSON.parse(await readFile('public/authority/root.json','utf8'));
+          const pin=root.root_pin??root.trust_bundle?.profile_authorization?.protected?.key_id;
+          if(!/^[0-9a-f]{64}$/.test(pin??''))throw Error('Public source root pin absent');
+          await appendFile(process.env.GITHUB_ENV,'WHP_ROOT_PIN='+pin+'\n');
+          for(let attempt=0;attempt<30;attempt++){
+            try {
+              const r=await fetch(process.env.WHP_ORIGIN+'/discovery/applicability.json',{signal:AbortSignal.timeout(15000)});
+              if(r.ok&&(await r.json()).contexts?.length===13){
+                const s=await fetch(process.env.WHP_ORIGIN+'/server.json',{signal:AbortSignal.timeout(15000)});
+                if(s.ok&&(await s.json()).description==='Verify signed JSON provenance and bounds through COPY/COMPOSE. Payment does not guarantee a Mark.')process.exit(0);
+              }
+            }catch{}
+            await new Promise(resolve=>setTimeout(resolve,10000));
+          }
+          throw Error('New production discovery surface was not observed');
+          JS
+      - name: Publish recovered MCP metadata with GitHub OIDC and verify registry read-back
+        run: bash scripts/publish-mcp.sh
+      - name: Preserve the exact publication evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: whp-machine-exposure-${{ github.run_id }}
+          path: evidence/public-service/
+          if-no-files-found: warn
+          retention-days: 90

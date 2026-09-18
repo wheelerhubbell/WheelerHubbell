@@ -1,0 +1,12 @@
+name: Pinned source assembly receipt
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  receipt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Display completed source-assembly receipt without rebuilding or testing
+        run: cat evidence/production-assembly/source-join.json

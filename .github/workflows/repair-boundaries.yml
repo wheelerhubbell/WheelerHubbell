@@ -1,0 +1,40 @@
+name: Bounded production repair verification
+on:
+  push:
+    branches: [production-fresh-keys-20260915]
+permissions:
+  contents: read
+jobs:
+  boundaries:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify only changed source boundaries
+        if: ${{ !contains(github.event.head_commit.message, 'Administrative credential availability only') }}
+        run: node scripts/check-repair-boundaries.mjs
+      - name: Check administrative credential availability without using or revealing it
+        env:
+          WHP_ADMIN_CREDENTIAL_PRESENT: ${{ secrets.NETLIFY_AUTH_TOKEN != '' }}
+        run: |
+          mkdir -p artifacts
+          node --input-type=module -e 'import {writeFileSync} from "node:fs"; const r={checked_at:new Date().toISOString(),source_commit:process.env.GITHUB_SHA,netlify_admin_credential_present:process.env.WHP_ADMIN_CREDENTIAL_PRESENT==="true",credential_value_retrieved:false,netlify_api_called:false,production_keys_generated:false}; writeFileSync("artifacts/admin-credential-availability.json",JSON.stringify(r,null,2)+"\n"); console.log(JSON.stringify(r));'
+      - name: Preserve the exact nonsecret source snapshot
+        if: always()
+        run: |
+          mkdir -p artifacts
+          git archive --format=zip HEAD > artifacts/repair-source.zip
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bounded-production-repair
+          path: |
+            artifacts/repair-boundaries.json
+            artifacts/admin-credential-availability.json
+            artifacts/repair-source.zip
+          if-no-files-found: error

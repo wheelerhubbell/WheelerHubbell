@@ -1,0 +1,65 @@
+{
+  "id": "WHP-STANDING-STRUCTURED-PASSAGE",
+  "version": "1.1.0",
+  "implementation_status": "OPEN_ADMISSION_CANDIDATE_REQUIRES_EXPLICIT_ROOT_RATIFICATION",
+  "title": "Structured provenance and passage integrity",
+  "operations": [
+    "INFORM",
+    "RECOMMEND",
+    "EXECUTE"
+  ],
+  "transforms": [
+    "COPY",
+    "COMPOSE"
+  ],
+  "criteria": [
+    "SOURCE_SIGNATURE_AND_IDENTITY",
+    "TRUSTED_SCOPED_AUTHORITY",
+    "CONNECTED_ACYCLIC_GRAPH",
+    "EXACT_CONTENT_TRANSFORMATION",
+    "QUALIFIERS_PRESERVED",
+    "UNKNOWNS_PRESERVED",
+    "EXPLICIT_TRANSITION_WARRANT",
+    "OPERATION_NOT_ESCALATED",
+    "TEMPORAL_INTERSECTION",
+    "JURISDICTION_AND_SCOPE"
+  ],
+  "marks": [
+    "SOURCE",
+    "CONTEXT",
+    "RELATION",
+    "PASSAGE",
+    "UNKNOWN"
+  ],
+  "assessed": "Exact submitted signed JSON artifacts and COPY/COMPOSE transitions under admitted authority certificates or exact GitHub repository controller grants observed over HTTPS. Repository control authorizes only attestations about the named repository objects, not external truth, institutional authority or execution permission.",
+  "not_assessed": [
+    "Substantive truth of source assertions",
+    "Authenticity of an external locator beyond the admitted signer's attestation",
+    "Completeness of evidence outside the submitted graph",
+    "General natural-language inference",
+    "Execution or behavior of a submitted external workflow",
+    "External legal or domain authority",
+    "Legal compliance, safety or universal truth",
+    "Continuity of versions outside the submitted graph",
+    "Independent cryptographic proof of historical GitHub state; namespace observations are signed HTTPS observations by the assessor."
+  ],
+  "max_validity_seconds": 86400,
+  "review_triggers": [
+    "Assessed object or version changes",
+    "Source or authority withdrawal, correction, dispute or expiry",
+    "Profile or governing conditions change"
+  ],
+  "failure_outcome": "Signed assessment record; no Standing Mark",
+  "payment_policy": "Payment purchases an evaluation, never a favorable result. Identical purchase recovery does not create a new payment authorization.",
+  "namespace_admission": {
+    "class": "github-repository-control",
+    "namespace_pattern": "https://github.com/{owner}/{repo}",
+    "manifest_path": ".well-known/standing-authority.json",
+    "jurisdiction": "namespace-control",
+    "grant_binding": "Exact key, role, signed payload hashes, namespace scope, operations and validity. No wildcard source or transition grant.",
+    "freshness_seconds": 300,
+    "current_status": "An ACTIVE registry snapshot requires fresh observations of the exact submitted manifest hashes. Changed, withdrawn, expired or inaccessible manifests limit current standing; issuance-time evidence remains immutable.",
+    "source_locator": "Within the same canonical repository namespace.",
+    "issuer_scope": "github-repository:* authorizes assessment under this profile only."
+  }
+}

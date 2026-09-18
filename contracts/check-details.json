@@ -1,0 +1,18 @@
+{
+  "SOURCE_IDENTITY": "Root hash, identifier and version must identify the same submitted object.",
+  "ASSESSMENT_TIME": "The assessment must fall within the requested time window.",
+  "SOURCE_AUTHORITY": "An admitted source key must attest within its signed scope, operations and validity.",
+  "SOURCE_ACTIVE": "Non-active source versions cannot carry operative standing in this profile.",
+  "SOURCE_BOUNDS": "Source jurisdiction and scope must match the requested bounds exactly.",
+  "SOURCE_TIME": "Source validity must contain the requested time window.",
+  "GRAPH_CLOSURE": "Every submitted source must be connected to the root; cycles and missing references are forbidden.",
+  "TRANSITION_AUTHORITY": "A separately admitted transition authority must sign the exact passage.",
+  "TRANSITION_BOUNDS": "The warrant must contain the requested temporal and jurisdictional bounds.",
+  "WARRANT_EVIDENCE": "The signed warrant must name inspectable evidence in the submitted graph.",
+  "TRANSITION_REFERENCES": "Unknown source or target hash.",
+  "EXACT_TRANSFORMATION": "COPY preserves content and epistemic status. COMPOSE retains distinct hash-addressed members without fusion.",
+  "QUALIFIERS_PRESERVED": "All source qualifiers must survive unchanged; this profile permits no waiver.",
+  "UNKNOWNS_PRESERVED": "Unknowns, their descriptions and blocked operations must survive unchanged.",
+  "NO_FORCE_ESCALATION": "No target operation may exceed its parents or the exact transition grant.",
+  "REQUESTED_OPERATION": "The requested operation must survive every source, warrant and unresolved blocking unknown."
+}

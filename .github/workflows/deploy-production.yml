@@ -1,0 +1,48 @@
+name: Production source verification
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: whp-production-source-verification
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci --ignore-scripts
+      - run: python3 -m pip install -r requirements-verification.txt
+      - name: Verify committed authority and exact protocol
+        run: npm run check:activation
+      - name: Verify full A-to-B acquisition, independent verification and recovery
+        run: npm run check:open-acquisition
+      - name: Record provider-neutral source receipt
+        run: |
+          mkdir -p artifacts
+          node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          import {execFileSync} from 'node:child_process';
+          import authority from './public/authority/root.json' with {type:'json'};
+          import {PRODUCTION_PAYMENT_REQUIREMENTS} from './src/production-config.mjs';
+          const receipt={version:'WHP-PROVIDER-NEUTRAL-SOURCE-v1',source_commit:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),source_tree:execFileSync('git',['rev-parse','HEAD^{tree}'],{encoding:'utf8'}).trim(),root_pin:authority.root_pin,issuer_key_id:authority.issuer_key_id,payment_requirements:PRODUCTION_PAYMENT_REQUIREMENTS,hosting_provider_administered:false,payment_executed:false,production_completion:false};
+          writeFileSync('artifacts/provider-neutral-source.json',JSON.stringify(receipt,null,2)+'\n');
+          console.log(JSON.stringify(receipt));
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: provider-neutral-source-proof
+          path: artifacts/provider-neutral-source.json
+          if-no-files-found: error

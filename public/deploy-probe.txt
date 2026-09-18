@@ -1,0 +1,3 @@
+WHP Standing production deployment probe
+Purpose: establish the actual GitHub-to-current-Netlify production origin relationship without invoking tests, payment, authority mutation, or the historical Netlify account.
+Expected source repository: wheelerhubbell/WheelerHubbellPublishingStandingMark

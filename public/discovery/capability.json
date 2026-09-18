@@ -1,0 +1,14 @@
+{
+  "version": "WHP-STANDING-CAPABILITY-v1",
+  "capability_id": "urn:whp:standing:capability:1",
+  "capability_class": "urn:capability:machine-verifiable-standing:1",
+  "provider": {
+    "name": "Wheeler Hubbell Publishing",
+    "product": "WHP Standing"
+  },
+  "description": "Machine-verifiable standing under explicit authority and bounds.",
+  "resolution_path": "/.well-known/standing-capability.json",
+  "contract_path": "/v1/contract",
+  "profile_index_path": "/v1/profiles",
+  "authority_claim": false
+}

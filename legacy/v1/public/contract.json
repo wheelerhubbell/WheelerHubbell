@@ -1,0 +1,102 @@
+{
+  "id": "urn:whp:standing:mark-contract:1",
+  "public_version": "1",
+  "artifact_types": {
+    "positive": "WHP-STANDING-MARK-v1",
+    "negative": "WHP-STANDING-ASSESSMENT-v1",
+    "positive_name": "WHP Standing Mark v1",
+    "negative_name": "WHP Standing Assessment v1"
+  },
+  "result_version": "WHP-STANDING-RESULT-v1",
+  "canonicalization": {
+    "id": "WHP-JCS-I1",
+    "key_order": "UTF16_CODE_UNITS",
+    "encoding": "UTF-8",
+    "numbers": "SAFE_INTEGER_TOKENS_ONLY_NO_NEGATIVE_ZERO",
+    "array_order": "PRESERVED",
+    "unicode_normalization": "NONE",
+    "duplicate_keys": "REJECT",
+    "unknown_semantic_fields": "REJECT",
+    "max_depth": 64
+  },
+  "envelope": {
+    "fields": [
+      "protected",
+      "payload",
+      "signature"
+    ],
+    "protected_fields": [
+      "type",
+      "algorithm",
+      "canonicalization",
+      "key_id"
+    ],
+    "signed_fields": [
+      "protected",
+      "payload"
+    ],
+    "algorithm": "Ed25519",
+    "key_id": "SHA256-SPKI-DER"
+  },
+  "meaning": {
+    "issuer": "/payload/issuer",
+    "artifact_id": "/payload/mark_id",
+    "determination": "/payload/decision_record/outcome",
+    "establishes": "/payload/decision_record/assessment_boundary",
+    "does_not_establish": "/payload/limitations",
+    "components": "/payload/decision_record/components",
+    "operation": "/payload/submission/requested_operation",
+    "object": "/payload/object",
+    "bounds": "/payload/submission/bounds",
+    "provenance": "/payload/submission",
+    "qualifications": "/payload/submission/nodes",
+    "unknowns": "/payload/decision_record/unknowns",
+    "authority": "/payload/authority",
+    "issued_at": "/payload/issued_at",
+    "effective_at": "/payload/effective_at",
+    "expires_at": "/payload/expires_at"
+  },
+  "bootstrap": {
+    "identity_pointer": "/payload/discovery",
+    "authority_pointer": "/payload/authority",
+    "profile_pointer": "/payload/profile",
+    "authorization_pointer": "/payload/profile_authorization",
+    "purchase_id_pointer": "/payload/purchase_id",
+    "certificate_type": "WHP-AUTHORITY-CERTIFICATE-v1",
+    "authorization_type": "WHP-PROFILE-AUTHORIZATION-v1",
+    "resolution_type": "WHP-CAPABILITY-RESOLUTION-v1",
+    "resolution_role": "DISCOVERY",
+    "registry_type": "WHP-REGISTRY-SNAPSHOT-v1",
+    "verifier_arguments": [
+      "{mark}",
+      "--root-pin",
+      "{root_pin}",
+      "--registry",
+      "{registry}",
+      "--resolution",
+      "{resolution}"
+    ],
+    "test_arguments": [
+      "--allow-test"
+    ],
+    "root_admission": "Embedded root self-consistency is not institutional authentication. TEST never establishes LIVE authority.",
+    "trust_status_type": "WHP-TRUST-STATUS-v1",
+    "revocation_type": "WHP-KEY-REVOCATION-v1",
+    "resolution_arguments": [
+      "{resolution}",
+      "--resolution-only",
+      "--contract",
+      "{contract}",
+      "--root-pin",
+      "{root_pin}"
+    ]
+  },
+  "profile": {
+    "id": "WHP-STANDING-STRUCTURED-PASSAGE",
+    "version": "1.0.0",
+    "sha256": "4244be9ed0012eaeba8e2efeb9d274ad3c1f3e188748838c191129054d24c5ab"
+  },
+  "status_rule": "Historical issuance verification never implies current standing. A fresh independent signed registry check is required.",
+  "discovery_rule": "An immutable capability/resolution identity locates a separately signed current service. Current service metadata never rewrites historical meaning.",
+  "schema_sha256": "17a18f8d7400f010aa02d5e26946b8ae282b00667f5a1ad4d664465042311a54"
+}

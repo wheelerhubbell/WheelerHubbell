@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:whp:standing:v1.1:payment-requirements",
+  "title": "WHP Standing v1.1 payment-requirements",
+  "$defs": {
+    "requirements": {
+      "type": "object",
+      "properties": {
+        "scheme": {
+          "const": "exact"
+        },
+        "network": {
+          "type": "string",
+          "pattern": "^eip155:[1-9][0-9]*$"
+        },
+        "amount": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,77})$",
+          "x-whp-uint256": true
+        },
+        "asset": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}$"
+        },
+        "payTo": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}$"
+        },
+        "maxTimeoutSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300
+        },
+        "extra": {
+          "type": "object",
+          "properties": {
+            "assetTransferMethod": {
+              "const": "eip3009"
+            },
+            "paymentFlow": {
+              "const": "authorization"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          },
+          "required": [
+            "assetTransferMethod",
+            "paymentFlow",
+            "name",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "scheme",
+        "network",
+        "amount",
+        "asset",
+        "payTo",
+        "maxTimeoutSeconds",
+        "extra"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$ref": "#/$defs/requirements",
+  "x-whp-canonicalization": "WHP-JCS-I1",
+  "x-whp-cross-field-constraints": "See docs/FIRST-PUBLIC-V1.md; signatures, dates, graph closure, binding, authority and issuance conditions require semantic verification."
+}

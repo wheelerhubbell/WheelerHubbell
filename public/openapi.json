@@ -1,0 +1,529 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "WHP Standing",
+    "version": "1.0.0",
+    "description": "First public WHP Standing v1: immutable historical assessment, separate current registry and separate signed current capability discovery. TEST is never LIVE."
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "The canonical origin serving this contract."
+    }
+  ],
+  "paths": {
+    "/.well-known/agent-card.json": {
+      "get": {
+        "operationId": "getStandingCarrierAgentCard",
+        "responses": {
+          "200": {
+            "description": "A2A v1 Agent Card for the transparent transport-only WHP Standing carrier."
+          }
+        }
+      }
+    },
+    "/a2a": {
+      "post": {
+        "operationId": "sendMessageToStandingCarrier",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A2A SendMessage response carrying exact Mark bytes and canonical routes."
+          },
+          "503": {
+            "description": "The exact immutable Mark artifact was unavailable or failed its committed SHA-256 check."
+          }
+        }
+      }
+    },
+    "/.well-known/whp-standing.json": {
+      "get": {
+        "operationId": "discoverStanding",
+        "responses": {
+          "200": {
+            "description": "Durable signed result or requested public contract."
+          },
+          "503": {
+            "description": "Service/authority/provider unavailable; no optimistic success."
+          }
+        }
+      }
+    },
+    "/v1/profile": {
+      "get": {
+        "operationId": "getProfile",
+        "responses": {
+          "200": {
+            "description": "Durable signed result or requested public contract."
+          },
+          "503": {
+            "description": "Service/authority/provider unavailable; no optimistic success."
+          }
+        }
+      }
+    },
+    "/v1/evaluations": {
+      "post": {
+        "operationId": "purchaseEvaluation",
+        "security": [
+          {
+            "ClientProof": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "PAYMENT-SIGNATURE",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Base64 x402-v2 exact-EVM authorization with mandatory WHP quote-bound nonce."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "/schemas/submission.schema.json"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Durable signed result or requested public contract."
+          },
+          "202": {
+            "description": "Still pending; use the same purchase recovery identity."
+          },
+          "400": {
+            "description": "Malformed request or unsupported structure."
+          },
+          "401": {
+            "description": "Buyer authentication failed."
+          },
+          "402": {
+            "description": "x402-v2 payment required or invalid authorization."
+          },
+          "409": {
+            "description": "Identity conflict, expired quote or denied state transition."
+          },
+          "413": {
+            "description": "Request capacity exceeded."
+          },
+          "415": {
+            "description": "JSON content type required."
+          },
+          "503": {
+            "description": "Service/authority/provider unavailable; no optimistic success."
+          }
+        }
+      }
+    },
+    "/v1/purchases/{purchase_id}/result": {
+      "get": {
+        "operationId": "retrieveResult",
+        "parameters": [
+          {
+            "name": "purchase_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        ],
+        "security": [
+          {
+            "ClientProof": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Durable signed result or requested public contract."
+          },
+          "202": {
+            "description": "Still pending; use the same purchase recovery identity."
+          },
+          "401": {
+            "description": "Buyer authentication failed."
+          },
+          "404": {
+            "description": "No such resource."
+          },
+          "503": {
+            "description": "Service/authority/provider unavailable; no optimistic success."
+          }
+        }
+      }
+    },
+    "/v1/purchases/{purchase_id}/recover": {
+      "post": {
+        "operationId": "recoverOriginalPurchase",
+        "parameters": [
+          {
+            "name": "purchase_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        ],
+        "security": [
+          {
+            "ClientProof": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Durable signed result or requested public contract."
+          },
+          "202": {
+            "description": "Still pending; use the same purchase recovery identity."
+          },
+          "400": {
+            "description": "Malformed request or unsupported structure."
+          },
+          "401": {
+            "description": "Buyer authentication failed."
+          },
+          "404": {
+            "description": "No such resource."
+          },
+          "409": {
+            "description": "Identity conflict, expired quote or denied state transition."
+          },
+          "503": {
+            "description": "Service/authority/provider unavailable; no optimistic success."
+          }
+        }
+      }
+    },
+    "/v1/registry/{purchase_id}": {
+      "get": {
+        "operationId": "readRegistry",
+        "parameters": [
+          {
+            "name": "purchase_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Durable signed result or requested public contract."
+          },
+          "404": {
+            "description": "No such resource."
+          },
+          "503": {
+            "description": "Service/authority/provider unavailable; no optimistic success."
+          }
+        }
+      }
+    },
+    "/v1/reviews": {
+      "post": {
+        "operationId": "submitReview",
+        "security": [
+          {
+            "ClientProof": []
+          }
+        ],
+        "description": "Signed reviewer request; durable receipt does not change standing. Fields: client_reference, reviewer_key, purchase_id, reason, evidence_hashes.",
+        "responses": {
+          "201": {
+            "description": "Signed durable review receipt, not an adjudication."
+          },
+          "400": {
+            "description": "Malformed request or unsupported structure."
+          },
+          "401": {
+            "description": "Buyer authentication failed."
+          },
+          "404": {
+            "description": "No such resource."
+          },
+          "409": {
+            "description": "Identity conflict, expired quote or denied state transition."
+          },
+          "503": {
+            "description": "Service/authority/provider unavailable; no optimistic success."
+          }
+        }
+      }
+    },
+    "/v1/contract": {
+      "get": {
+        "operationId": "getStandingPurchaseContract",
+        "responses": {
+          "200": {
+            "description": "Complete schema, authority, authentication, quote binding and independent buyer payment requirements."
+          },
+          "503": {
+            "description": "Service/authority unavailable."
+          }
+        }
+      }
+    },
+    "/v1/verification": {
+      "get": {
+        "operationId": "getStandingVerification",
+        "responses": {
+          "200": {
+            "description": "Content-addressed independent verifier and invocation recipe."
+          },
+          "503": {
+            "description": "Service/authority unavailable."
+          }
+        }
+      }
+    },
+    "/v1/profiles/{profile_id}/{version}": {
+      "get": {
+        "operationId": "getStandingProfileVersion",
+        "responses": {
+          "200": {
+            "description": "Exact hash-addressed WHP Standing Profile and authorization."
+          },
+          "503": {
+            "description": "Service/authority unavailable."
+          }
+        },
+        "parameters": [
+          {
+            "name": "profile_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/.well-known/api-catalog": {
+      "get": {
+        "operationId": "getApiCatalog",
+        "responses": {
+          "200": {
+            "description": "RFC 9727 API catalog."
+          },
+          "503": {
+            "description": "Service/authority unavailable."
+          }
+        }
+      }
+    },
+    "/server.json": {
+      "get": {
+        "operationId": "getMcpServerMetadata",
+        "responses": {
+          "200": {
+            "description": "Remote MCP metadata; not evidence of registry acceptance."
+          },
+          "503": {
+            "description": "Service/authority unavailable."
+          }
+        }
+      }
+    },
+    "/robots.txt": {
+      "get": {
+        "operationId": "getRobotsPolicy",
+        "responses": {
+          "200": {
+            "description": "Crawler policy."
+          },
+          "503": {
+            "description": "Service/authority unavailable."
+          }
+        }
+      }
+    },
+    "/sitemap.xml": {
+      "get": {
+        "operationId": "getCanonicalSitemap",
+        "responses": {
+          "200": {
+            "description": "Canonical documentation URLs."
+          },
+          "503": {
+            "description": "Service/authority unavailable."
+          }
+        }
+      }
+    },
+    "/llms.txt": {
+      "get": {
+        "operationId": "getMachineDocumentation",
+        "responses": {
+          "200": {
+            "description": "Indexable capability, bounds, contract and payment documentation."
+          },
+          "503": {
+            "description": "Service/authority unavailable."
+          }
+        }
+      }
+    },
+    "/mcp": {
+      "post": {
+        "operationId": "callStandingMcp",
+        "summary": "Stateless Streamable HTTP MCP; no wallet credentials accepted.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "jsonrpc",
+                  "method"
+                ],
+                "properties": {
+                  "jsonrpc": {
+                    "const": "2.0"
+                  },
+                  "method": {
+                    "type": "string"
+                  },
+                  "id": {},
+                  "params": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "JSON-RPC response; 402 terms are carried by tool structuredContent.http_status."
+          },
+          "202": {
+            "description": "Accepted notification."
+          },
+          "400": {
+            "description": "Invalid message."
+          },
+          "403": {
+            "description": "Invalid Origin."
+          },
+          "405": {
+            "description": "Unsupported transport method."
+          }
+        }
+      }
+    },
+    "/.well-known/standing-capability.json": {
+      "get": {
+        "summary": "Fresh separately signed current capability resolution; DISCOVERY authority required.",
+        "responses": {
+          "200": {
+            "description": "Fresh separately signed current capability resolution; DISCOVERY authority required."
+          }
+        }
+      }
+    },
+    "/v1/contracts/mark-v1.json": {
+      "get": {
+        "summary": "Immutable first-public historical contract manifest.",
+        "responses": {
+          "200": {
+            "description": "Immutable first-public historical contract manifest."
+          }
+        }
+      }
+    },
+    "/v1/profiles": {
+      "get": {
+        "summary": "Current published profile index; historical Marks bind exact embedded content.",
+        "responses": {
+          "200": {
+            "description": "Current published profile index; historical Marks bind exact embedded content."
+          }
+        }
+      }
+    },
+    "/v1/immutable/{sha256}": {
+      "get": {
+        "summary": "Immutable profile, schema or semantic contract by SHA-256.",
+        "responses": {
+          "200": {
+            "description": "Immutable profile, schema or semantic contract by SHA-256."
+          }
+        },
+        "parameters": [
+          {
+            "name": "sha256",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        ]
+      }
+    },
+    "/discovery/capability.json": {
+      "get": {
+        "summary": "Provider capability description, not epistemic standing.",
+        "responses": {
+          "200": {
+            "description": "Provider capability description, not epistemic standing."
+          }
+        }
+      }
+    },
+    "/discovery/provider-index.json": {
+      "get": {
+        "summary": "Self-published capability index, not an external registration.",
+        "responses": {
+          "200": {
+            "description": "Self-published capability index, not an external registration."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ClientProof": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "WHP-Client-Proof",
+        "description": "Base64 WHP-CLIENT-PROOF-v1 Ed25519 signature binding method, exact path/query, body SHA256, issued_at, expires_at and random nonce. See wire contract."
+      }
+    }
+  },
+  "x-whp-purchase-contract": "/v1/contract",
+  "x-whp-verification": "/v1/verification"
+}

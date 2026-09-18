@@ -1,0 +1,100 @@
+name: Historical production authority administration (manual only)
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: whp-current-production-authority
+  cancel-in-progress: false
+jobs:
+  authority:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE_ID: '813ee022-f4d9-4d8e-a974-86158583a39f'
+      WHP_ROOT_PIN: 'e3a0a2945081823171841bde32a6df7fc505b6f0b3e6ab9b6c85ecc9f3d49bfc'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci --ignore-scripts
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 -m pip install -r requirements-verification.txt
+      - name: Verify signed rules and full TEST gate, then synchronize only existing v1.1 authority
+        run: node scripts/open-authority-administration.mjs sync artifacts/authority-prepared
+      - name: Publish the matching public snapshot and retained history
+        id: publication
+        run: |
+          mkdir -p public/authority/history
+          cp artifacts/authority-prepared/root.json public/authority/root.json
+          cp artifacts/authority-prepared/trust-bundle.json public/authority/trust-bundle.json
+          cp -R artifacts/authority-prepared/history/. public/authority/history/
+          git add -- public/authority evidence/open-acquisition/recursive-chain.json
+          if ! git diff --cached --quiet; then
+            git config user.name 'WHP authority administration'
+            git config user.email 'wheelerhubbell@users.noreply.github.com'
+            git commit -m 'Publish matching WHP v1.1 production authority epoch'
+            git push origin HEAD:main
+          fi
+          echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Bind the CLI deployment to its exact committed source
+        env:
+          EXPECTED_DEPLOY_COMMIT: ${{ steps.publication.outputs.commit }}
+        run: |
+          git diff --quiet
+          git diff --cached --quiet
+          node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          import {execFileSync} from 'node:child_process';
+          import {PROFILE_HASH} from './src/profile.mjs';
+          import {CONTRACT_HASH,VERIFIER_HASH} from './src/protocol.mjs';
+          const commit=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
+          if(commit!==process.env.EXPECTED_DEPLOY_COMMIT)throw Error('DEPLOYMENT_SOURCE_CHANGED');
+          const stamp={version:'WHP-DEPLOYMENT-SOURCE-v1',site_id:process.env.NETLIFY_SITE_ID,source_commit:commit,
+            source_tree:execFileSync('git',['rev-parse','HEAD^{tree}'],{encoding:'utf8'}).trim(),
+            profile_sha256:PROFILE_HASH,contract_sha256:CONTRACT_HASH,verifier_sha256:VERIFIER_HASH,production_completion:false};
+          writeFileSync('public/deployment.json',JSON.stringify(stamp,null,2)+'\n');
+          NODE
+      - name: Deploy the signed and tested version to the existing production site
+        env:
+          WHP_ACTIVATION_BUNDLE: public/authority/trust-bundle.json
+        run: npx -y netlify-cli@27.7.0 deploy --prod --build --context production --site "$NETLIFY_SITE_ID" --json > artifacts/netlify-deploy.json
+      - name: Observe the exact deployment and matching v1.1 runtime
+        env:
+          EXPECTED_DEPLOY_COMMIT: ${{ steps.publication.outputs.commit }}
+          NETLIFY_DEPLOY_RESULT: artifacts/netlify-deploy.json
+        run: node scripts/observe-authority-deployment.mjs
+      - name: Check real-chain completion after deployment when evidence is supplied
+        env:
+          WHP_LIVE_CHAIN_DIR: ${{ vars.WHP_LIVE_CHAIN_DIR }}
+          WHP_RELEASE_ROOT_PIN: ${{ vars.WHP_RELEASE_ROOT_PIN }}
+          WHP_RELEASE_RPC_URL: ${{ secrets.WHP_RELEASE_RPC_URL }}
+        run: |
+          if [ -n "${WHP_LIVE_CHAIN_DIR:-}${WHP_RELEASE_ROOT_PIN:-}${WHP_RELEASE_RPC_URL:-}" ]; then
+            node scripts/check-live-chain.mjs > artifacts/live-completion.json
+          else
+            node --input-type=module <<'NODE'
+          import {writeFileSync} from 'node:fs';
+          const report={deployment_observed:true,live_chain_status:'PENDING_EVIDENCE',production_completion:false};
+          writeFileSync('artifacts/live-completion.json',JSON.stringify(report,null,2)+'\n');
+          console.log(JSON.stringify(report));
+          NODE
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: production-authority-proof
+          path: |
+            artifacts/authority-deployment.json
+            artifacts/netlify-deploy.json
+            artifacts/live-completion.json
+            artifacts/authority-prepared/
+            evidence/open-acquisition/recursive-chain.json
+          if-no-files-found: ignore

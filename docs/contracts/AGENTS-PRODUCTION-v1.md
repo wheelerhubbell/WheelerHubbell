@@ -1,0 +1,9 @@
+# WHP Standing first public v1
+
+Read `docs/FIRST-PUBLIC-V1.md` before modifying any cryptographic component. Signer, closed schema, canonicalization, authority/profile commitments, immutable discovery identity, current resolution/status, independent verifier and replay are one coupled versioned object. Preserve development provenance; do not restore candidate adapters or call this v2.
+
+The three objects are distinct: historical Mark, current registry, current service discovery. Preserve root pinning, explicit roles, freshness, revocation/withdrawal, exact payment binding and durable retrieval. TEST never implies LIVE, SOLD, DEPLOYED or ISSUED.
+
+This repository is a production assembly, not a new contract development branch. The authoritative first-public source is fdf72e5963f76b89b387f88cdfb32228c6c83114; production machinery comes from e1c030f3942973aec947be1d90f9060e33f4d34c. Existing 129/107/83 test results retain their recorded scope. Do not rerun these suites, simulated propagation, generic preflight or regression tests. Only establish newly assembled production relationships. Never generate or rotate the WHP root. Use the existing root and issuer for current first-public ratification. The sole production target is https://whpstandingmark.netlify.app; the WHPStanding repository remains read-only. Complete after deployment and the bounded public authority/discovery/unpaid-payment observation. A buyer, sale, LIVE Mark or observed LIVE propagation is not required.
+
+Need recognition and generic provider matching are vendor-neutral. No missing-Mark-to-buy-WHP rule is permitted. Cold proofs start with only the specified input and generic runtime. No hard-coded provider address, fixture, issuer key, root pin, clock or repository imports may enter the consumer. Downloaded code runs only in the public-artifact sandbox.

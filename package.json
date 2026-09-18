@@ -1,0 +1,52 @@
+{
+  "name": "whp-standing",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.16.0"
+  },
+  "scripts": {
+    "build:buyer": "node scripts/package-buyer.mjs",
+    "check:acquisition-repair": "npm run build:buyer && node --test test/acquisition-repair.test.mjs",
+    "check:direct-wallet": "node --test test/direct-wallet.test.mjs",
+    "test": "node --test test/open-acquisition.test.mjs",
+    "verify": "npm run check:open-acquisition",
+    "demonstrate": "node scripts/demonstrate.mjs",
+    "start": "node src/server.mjs",
+    "schemas": "python3 scripts/generate-schemas.py",
+    "migrate": "node scripts/migrate.mjs",
+    "buy": "node scripts/buy.mjs",
+    "check:open-acquisition": "python3 scripts/freeze-contract.py --check && python3 scripts/check-schemas.py && npm run build:buyer && node --test test/open-acquisition.test.mjs",
+    "check:release": "npm run check:open-acquisition && node scripts/check-live-chain.mjs",
+    "check:activation": "node scripts/check-activation.mjs"
+  },
+  "dependencies": {
+    "@netlify/database": "2.0.1"
+  },
+  "optionalDependencies": {
+    "pg": "8.16.3"
+  },
+  "description": "WHP Standing: machine-verifiable standing under explicit authority and bounds.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wheelerhubbell/WheelerHubbellPublishingStandingMark.git"
+  },
+  "author": "Wheeler Hubbell Publishing",
+  "keywords": [
+    "WHP Standing",
+    "WHP Standing Mark",
+    "WHP Standing Profile",
+    "WHP Standing Evaluation",
+    "x402",
+    "MCP",
+    "provenance"
+  ],
+  "mcpName": "io.github.wheelerhubbell/whp-standing",
+  "devDependencies": {
+    "@x402/core": "2.26.0",
+    "@x402/evm": "2.26.0",
+    "@x402/fetch": "2.26.0",
+    "viem": "2.47.6"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "id": "WHP-STANDING-STRUCTURED-PASSAGE",
+  "version": "1.0.0",
+  "implementation_status": "PUBLIC_V1_REQUIRES_EXPLICIT_ISSUER_RATIFICATION",
+  "title": "Structured provenance and passage integrity",
+  "operations": [
+    "INFORM",
+    "RECOMMEND",
+    "EXECUTE"
+  ],
+  "transforms": [
+    "COPY",
+    "COMPOSE"
+  ],
+  "criteria": [
+    "SOURCE_SIGNATURE_AND_IDENTITY",
+    "TRUSTED_SCOPED_AUTHORITY",
+    "CONNECTED_ACYCLIC_GRAPH",
+    "EXACT_CONTENT_TRANSFORMATION",
+    "QUALIFIERS_PRESERVED",
+    "UNKNOWNS_PRESERVED",
+    "EXPLICIT_TRANSITION_WARRANT",
+    "OPERATION_NOT_ESCALATED",
+    "TEMPORAL_INTERSECTION",
+    "JURISDICTION_AND_SCOPE"
+  ],
+  "marks": [
+    "SOURCE",
+    "CONTEXT",
+    "RELATION",
+    "PASSAGE",
+    "UNKNOWN"
+  ],
+  "assessed": "Exact submitted signed JSON artifacts and COPY/COMPOSE transitions under admitted authority certificates. Relations assessed here are only the declared COPY and COMPOSE relations.",
+  "not_assessed": [
+    "Substantive truth of source assertions",
+    "Authenticity of an external locator beyond the admitted signer's attestation",
+    "Completeness of evidence outside the submitted graph",
+    "General natural-language inference",
+    "Execution or behavior of a submitted external workflow",
+    "External legal or domain authority",
+    "Legal compliance, safety or universal truth",
+    "Continuity of versions outside the submitted graph"
+  ],
+  "max_validity_seconds": 86400,
+  "review_triggers": [
+    "Assessed object or version changes",
+    "Source or authority withdrawal, correction, dispute or expiry",
+    "Profile or governing conditions change"
+  ],
+  "failure_outcome": "Signed assessment record; no Standing Mark",
+  "payment_policy": "Payment purchases an evaluation, never a favorable result. Identical purchase recovery does not create a new payment authorization."
+}

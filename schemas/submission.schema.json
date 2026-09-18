@@ -1,0 +1,520 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:whp:standing:v1.1:submission",
+  "title": "WHP Standing v1.1 submission",
+  "$defs": {
+    "value": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/value"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/value"
+          }
+        }
+      ],
+      "description": "WHP-JCS-I1 additionally forbids lone surrogates, negative zero, duplicate object keys and excessive nesting."
+    },
+    "unknown": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "INFORM",
+              "RECOMMEND",
+              "EXECUTE"
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 3,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "id",
+        "description",
+        "blocks"
+      ],
+      "additionalProperties": false
+    },
+    "node_payload": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "content": {
+          "$ref": "#/$defs/value"
+        },
+        "locator": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "epistemic_status": {
+          "enum": [
+            "OBSERVATION",
+            "REPORT",
+            "FINDING",
+            "INFERENCE",
+            "HYPOTHESIS",
+            "UNKNOWN"
+          ]
+        },
+        "qualifiers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "minItems": 0,
+          "maxItems": 128,
+          "uniqueItems": true
+        },
+        "unknowns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/unknown"
+          },
+          "minItems": 0,
+          "maxItems": 64,
+          "uniqueItems": true,
+          "x-whp-unique-key": "id"
+        },
+        "operations": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "INFORM",
+              "RECOMMEND",
+              "EXECUTE"
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 3,
+          "uniqueItems": true
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "jurisdiction": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "valid_from": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "valid_until": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "status": {
+          "enum": [
+            "ACTIVE",
+            "CORRECTED",
+            "SUPERSEDED",
+            "DISPUTED",
+            "WITHDRAWN"
+          ]
+        },
+        "prior_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "content",
+        "locator",
+        "epistemic_status",
+        "qualifiers",
+        "unknowns",
+        "operations",
+        "scope",
+        "jurisdiction",
+        "valid_from",
+        "valid_until",
+        "status",
+        "prior_hash"
+      ],
+      "additionalProperties": false
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "protected": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "WHP-SOURCE-ATTESTATION-v1"
+            },
+            "algorithm": {
+              "const": "Ed25519"
+            },
+            "canonicalization": {
+              "const": "WHP-JCS-I1"
+            },
+            "key_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "type",
+            "algorithm",
+            "canonicalization",
+            "key_id"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "$ref": "#/$defs/node_payload"
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        }
+      },
+      "required": [
+        "protected",
+        "payload",
+        "signature"
+      ],
+      "additionalProperties": false
+    },
+    "transition_payload": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "minItems": 1,
+          "maxItems": 64,
+          "uniqueItems": true
+        },
+        "to": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "transform": {
+          "enum": [
+            "COPY",
+            "COMPOSE"
+          ]
+        },
+        "operations": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "INFORM",
+              "RECOMMEND",
+              "EXECUTE"
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 3,
+          "uniqueItems": true
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "jurisdiction": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "valid_from": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "valid_until": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "warrant": {
+          "type": "object",
+          "properties": {
+            "statement": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "evidence_hashes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "minItems": 0,
+              "maxItems": 64,
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "statement",
+            "evidence_hashes"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "from",
+        "to",
+        "transform",
+        "operations",
+        "scope",
+        "jurisdiction",
+        "valid_from",
+        "valid_until",
+        "warrant"
+      ],
+      "additionalProperties": false
+    },
+    "transition": {
+      "type": "object",
+      "properties": {
+        "protected": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "WHP-TRANSITION-WARRANT-v1"
+            },
+            "algorithm": {
+              "const": "Ed25519"
+            },
+            "canonicalization": {
+              "const": "WHP-JCS-I1"
+            },
+            "key_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "type",
+            "algorithm",
+            "canonicalization",
+            "key_id"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "$ref": "#/$defs/transition_payload"
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        }
+      },
+      "required": [
+        "protected",
+        "payload",
+        "signature"
+      ],
+      "additionalProperties": false
+    },
+    "namespace_request": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "pattern": "^https://github\\.com/[a-z0-9][a-z0-9-]{0,38}/[a-z0-9_][a-z0-9_.-]{0,99}$"
+        },
+        "manifest_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "namespace",
+        "manifest_sha256"
+      ],
+      "additionalProperties": false
+    },
+    "profile_ref": {
+      "const": {
+        "id": "WHP-STANDING-STRUCTURED-PASSAGE",
+        "version": "1.1.0",
+        "sha256": "d6296b9ea7a2c570c2c0ae98af8385d6f8edee1e869fb0ae9f553c90302303a7"
+      }
+    },
+    "submission": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "const": "WHP-STANDING-SUBMISSION-v1.1"
+        },
+        "client_reference": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "authority": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/namespace_request"
+          },
+          "minItems": 0,
+          "maxItems": 8
+        },
+        "profile": {
+          "$ref": "#/$defs/profile_ref"
+        },
+        "object": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "root": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "id",
+            "version",
+            "root"
+          ],
+          "additionalProperties": false
+        },
+        "bounds": {
+          "type": "object",
+          "properties": {
+            "scope": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "jurisdiction": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "valid_from": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "valid_until": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "scope",
+            "jurisdiction",
+            "valid_from",
+            "valid_until"
+          ],
+          "additionalProperties": false
+        },
+        "requested_operation": {
+          "enum": [
+            "INFORM",
+            "RECOMMEND",
+            "EXECUTE"
+          ]
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/source"
+          },
+          "minItems": 1,
+          "maxItems": 64
+        },
+        "transitions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/transition"
+          },
+          "minItems": 0,
+          "maxItems": 64
+        }
+      },
+      "required": [
+        "version",
+        "client_reference",
+        "authority",
+        "profile",
+        "object",
+        "bounds",
+        "requested_operation",
+        "nodes",
+        "transitions"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$ref": "#/$defs/submission",
+  "x-whp-canonicalization": "WHP-JCS-I1",
+  "x-whp-cross-field-constraints": "See docs/FIRST-PUBLIC-V1.md; signatures, dates, graph closure, binding, authority and issuance conditions require semantic verification."
+}

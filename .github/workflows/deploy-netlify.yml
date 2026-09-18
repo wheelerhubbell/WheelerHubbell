@@ -1,0 +1,28 @@
+name: Deploy current main to Netlify
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: whp-netlify-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE_ID: '97a9ed85-361a-4e75-ab18-c0eaef334155'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Deploy committed main tree to existing Netlify production site
+        run: npx -y netlify-cli@27.7.0 deploy --prod --build --context production --site "$NETLIFY_SITE_ID"

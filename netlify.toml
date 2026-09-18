@@ -1,0 +1,21 @@
+# Intended Git-connected production target: wheeler-hubbell-publishing-standing-mark
+# Netlify site ID: 0347a387-82b7-4b7f-b528-1024ad79b9e7 (configured in Netlify, not by this comment).
+[build]
+  command = "npm run check:activation && node scripts/check-deployment.mjs && npm run check:open-acquisition"
+  publish = "public"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["pg", "@netlify/database"]
+  included_files = ["public/immutable/**", "public/verification/**"]
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/standing/:splat"
+  status = 200
+  force = true
+
+[build.environment]
+  NODE_VERSION = "24"
+  PYTHON_VERSION = "3.12"

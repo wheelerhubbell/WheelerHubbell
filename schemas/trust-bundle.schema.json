@@ -1,0 +1,426 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:whp:standing:v1.1:trust-bundle",
+  "title": "WHP Standing v1.1 trust-bundle",
+  "$defs": {
+    "profile_authorization": {
+      "type": "object",
+      "properties": {
+        "protected": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "WHP-PROFILE-AUTHORIZATION-v1"
+            },
+            "algorithm": {
+              "const": "Ed25519"
+            },
+            "canonicalization": {
+              "const": "WHP-JCS-I1"
+            },
+            "key_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "type",
+            "algorithm",
+            "canonicalization",
+            "key_id"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "profile_hash": {
+              "const": "d6296b9ea7a2c570c2c0ae98af8385d6f8edee1e869fb0ae9f553c90302303a7"
+            },
+            "contract_hash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "verifier_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "ratified": {
+              "const": true
+            },
+            "issuer": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "environment": {
+              "enum": [
+                "TEST",
+                "LIVE"
+              ]
+            },
+            "valid_from": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "valid_until": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "profile_hash",
+            "contract_hash",
+            "verifier_sha256",
+            "ratified",
+            "issuer",
+            "environment",
+            "valid_from",
+            "valid_until"
+          ],
+          "additionalProperties": false
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        }
+      },
+      "required": [
+        "protected",
+        "payload",
+        "signature"
+      ],
+      "additionalProperties": false
+    },
+    "certificate": {
+      "type": "object",
+      "properties": {
+        "protected": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "WHP-AUTHORITY-CERTIFICATE-v1"
+            },
+            "algorithm": {
+              "const": "Ed25519"
+            },
+            "canonicalization": {
+              "const": "WHP-JCS-I1"
+            },
+            "key_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "type",
+            "algorithm",
+            "canonicalization",
+            "key_id"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "public_key": {
+              "type": "string",
+              "maxLength": 256,
+              "description": "Canonical base64 DER SubjectPublicKeyInfo containing exactly an Ed25519 public key."
+            },
+            "subject": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "roles": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "SOURCE",
+                  "TRANSITION",
+                  "ISSUER",
+                  "REGISTRY",
+                  "DISCOVERY"
+                ]
+              },
+              "minItems": 0,
+              "maxItems": 64
+            },
+            "scopes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              },
+              "minItems": 0,
+              "maxItems": 64
+            },
+            "jurisdictions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              },
+              "minItems": 0,
+              "maxItems": 64
+            },
+            "operations": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "INFORM",
+                  "RECOMMEND",
+                  "EXECUTE"
+                ]
+              },
+              "minItems": 0,
+              "maxItems": 3,
+              "uniqueItems": true
+            },
+            "profile_hash": {
+              "const": "d6296b9ea7a2c570c2c0ae98af8385d6f8edee1e869fb0ae9f553c90302303a7"
+            },
+            "valid_from": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "valid_until": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "public_key",
+            "subject",
+            "roles",
+            "scopes",
+            "jurisdictions",
+            "operations",
+            "profile_hash",
+            "valid_from",
+            "valid_until"
+          ],
+          "additionalProperties": false
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        }
+      },
+      "required": [
+        "protected",
+        "payload",
+        "signature"
+      ],
+      "additionalProperties": false
+    },
+    "revocation": {
+      "type": "object",
+      "properties": {
+        "protected": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "WHP-KEY-REVOCATION-v1"
+            },
+            "algorithm": {
+              "const": "Ed25519"
+            },
+            "canonicalization": {
+              "const": "WHP-JCS-I1"
+            },
+            "key_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "type",
+            "algorithm",
+            "canonicalization",
+            "key_id"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "key_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "effective_at": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          },
+          "required": [
+            "key_id",
+            "effective_at",
+            "reason"
+          ],
+          "additionalProperties": false
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        }
+      },
+      "required": [
+        "protected",
+        "payload",
+        "signature"
+      ],
+      "additionalProperties": false
+    },
+    "trust_status": {
+      "type": "object",
+      "properties": {
+        "protected": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "WHP-TRUST-STATUS-v1"
+            },
+            "algorithm": {
+              "const": "Ed25519"
+            },
+            "canonicalization": {
+              "const": "WHP-JCS-I1"
+            },
+            "key_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "type",
+            "algorithm",
+            "canonicalization",
+            "key_id"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "sequence": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "previous_hash": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "profile_authorization_hash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "certificates_hash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "revocations_hash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "valid_from": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "valid_until": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "sequence",
+            "previous_hash",
+            "profile_authorization_hash",
+            "certificates_hash",
+            "revocations_hash",
+            "valid_from",
+            "valid_until"
+          ],
+          "additionalProperties": false
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        }
+      },
+      "required": [
+        "protected",
+        "payload",
+        "signature"
+      ],
+      "additionalProperties": false
+    },
+    "trust_bundle": {
+      "type": "object",
+      "properties": {
+        "root_public_key": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "Canonical base64 DER SubjectPublicKeyInfo containing exactly an Ed25519 public key."
+        },
+        "profile_authorization": {
+          "$ref": "#/$defs/profile_authorization"
+        },
+        "certificates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/certificate"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "revocations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/revocation"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "status_snapshot": {
+          "$ref": "#/$defs/trust_status"
+        }
+      },
+      "required": [
+        "root_public_key",
+        "profile_authorization",
+        "certificates",
+        "revocations",
+        "status_snapshot"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$ref": "#/$defs/trust_bundle",
+  "x-whp-canonicalization": "WHP-JCS-I1",
+  "x-whp-cross-field-constraints": "See docs/FIRST-PUBLIC-V1.md; signatures, dates, graph closure, binding, authority and issuance conditions require semantic verification."
+}

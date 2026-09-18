@@ -1,0 +1,2695 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:whp:standing:v1:result",
+  "title": "WHP Standing v1 result",
+  "$defs": {
+    "value": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/value"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/value"
+          }
+        }
+      ],
+      "description": "WHP-JCS-I1 additionally forbids lone surrogates, negative zero, duplicate object keys and excessive nesting."
+    },
+    "unknown": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "INFORM",
+              "RECOMMEND",
+              "EXECUTE"
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 3,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "id",
+        "description",
+        "blocks"
+      ],
+      "additionalProperties": false
+    },
+    "node_payload": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "content": {
+          "$ref": "#/$defs/value"
+        },
+        "locator": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "epistemic_status": {
+          "enum": [
+            "OBSERVATION",
+            "REPORT",
+            "FINDING",
+            "INFERENCE",
+            "HYPOTHESIS",
+            "UNKNOWN"
+          ]
+        },
+        "qualifiers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "minItems": 0,
+          "maxItems": 128,
+          "uniqueItems": true
+        },
+        "unknowns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/unknown"
+          },
+          "minItems": 0,
+          "maxItems": 64,
+          "uniqueItems": true,
+          "x-whp-unique-key": "id"
+        },
+        "operations": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "INFORM",
+              "RECOMMEND",
+              "EXECUTE"
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 3,
+          "uniqueItems": true
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "jurisdiction": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "valid_from": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "valid_until": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "status": {
+          "enum": [
+            "ACTIVE",
+            "CORRECTED",
+            "SUPERSEDED",
+            "DISPUTED",
+            "WITHDRAWN"
+          ]
+        },
+        "prior_hash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "content",
+        "locator",
+        "epistemic_status",
+        "qualifiers",
+        "unknowns",
+        "operations",
+        "scope",
+        "jurisdiction",
+        "valid_from",
+        "valid_until",
+        "status",
+        "prior_hash"
+      ],
+      "additionalProperties": false
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "protected": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "WHP-SOURCE-ATTESTATION-v1"
+            },
+            "algorithm": {
+              "const": "Ed25519"
+            },
+            "canonicalization": {
+              "const": "WHP-JCS-I1"
+            },
+            "key_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "type",
+            "algorithm",
+            "canonicalization",
+            "key_id"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "$ref": "#/$defs/node_payload"
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        }
+      },
+      "required": [
+        "protected",
+        "payload",
+        "signature"
+      ],
+      "additionalProperties": false
+    },
+    "transition_payload": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "minItems": 1,
+          "maxItems": 64,
+          "uniqueItems": true
+        },
+        "to": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "transform": {
+          "enum": [
+            "COPY",
+            "COMPOSE"
+          ]
+        },
+        "operations": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "INFORM",
+              "RECOMMEND",
+              "EXECUTE"
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 3,
+          "uniqueItems": true
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "jurisdiction": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "valid_from": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "valid_until": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "warrant": {
+          "type": "object",
+          "properties": {
+            "statement": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "evidence_hashes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "minItems": 0,
+              "maxItems": 64,
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "statement",
+            "evidence_hashes"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "from",
+        "to",
+        "transform",
+        "operations",
+        "scope",
+        "jurisdiction",
+        "valid_from",
+        "valid_until",
+        "warrant"
+      ],
+      "additionalProperties": false
+    },
+    "transition": {
+      "type": "object",
+      "properties": {
+        "protected": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "WHP-TRANSITION-WARRANT-v1"
+            },
+            "algorithm": {
+              "const": "Ed25519"
+            },
+            "canonicalization": {
+              "const": "WHP-JCS-I1"
+            },
+            "key_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "type",
+            "algorithm",
+            "canonicalization",
+            "key_id"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "$ref": "#/$defs/transition_payload"
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        }
+      },
+      "required": [
+        "protected",
+        "payload",
+        "signature"
+      ],
+      "additionalProperties": false
+    },
+    "profile_ref": {
+      "const": {
+        "id": "WHP-STANDING-STRUCTURED-PASSAGE",
+        "version": "1.0.0",
+        "sha256": "4244be9ed0012eaeba8e2efeb9d274ad3c1f3e188748838c191129054d24c5ab"
+      }
+    },
+    "submission": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "const": "WHP-STANDING-SUBMISSION-v1"
+        },
+        "client_reference": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{16,96}$"
+        },
+        "buyer_key": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "Canonical base64 DER SubjectPublicKeyInfo containing exactly an Ed25519 public key."
+        },
+        "profile": {
+          "$ref": "#/$defs/profile_ref"
+        },
+        "object": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "root": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "id",
+            "version",
+            "root"
+          ],
+          "additionalProperties": false
+        },
+        "bounds": {
+          "type": "object",
+          "properties": {
+            "scope": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "jurisdiction": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "valid_from": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "valid_until": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "scope",
+            "jurisdiction",
+            "valid_from",
+            "valid_until"
+          ],
+          "additionalProperties": false
+        },
+        "requested_operation": {
+          "enum": [
+            "INFORM",
+            "RECOMMEND",
+            "EXECUTE"
+          ]
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/source"
+          },
+          "minItems": 1,
+          "maxItems": 64
+        },
+        "transitions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/transition"
+          },
+          "minItems": 0,
+          "maxItems": 64
+        }
+      },
+      "required": [
+        "version",
+        "client_reference",
+        "buyer_key",
+        "profile",
+        "object",
+        "bounds",
+        "requested_operation",
+        "nodes",
+        "transitions"
+      ],
+      "additionalProperties": false
+    },
+    "profile_authorization": {
+      "type": "object",
+      "properties": {
+        "protected": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "WHP-PROFILE-AUTHORIZATION-v1"
+            },
+            "algorithm": {
+              "const": "Ed25519"
+            },
+            "canonicalization": {
+              "const": "WHP-JCS-I1"
+            },
+            "key_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "type",
+            "algorithm",
+            "canonicalization",
+            "key_id"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "profile_hash": {
+              "const": "4244be9ed0012eaeba8e2efeb9d274ad3c1f3e188748838c191129054d24c5ab"
+            },
+            "contract_hash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "verifier_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "ratified": {
+              "const": true
+            },
+            "issuer": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "environment": {
+              "enum": [
+                "TEST",
+                "LIVE"
+              ]
+            },
+            "valid_from": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "valid_until": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "profile_hash",
+            "contract_hash",
+            "verifier_sha256",
+            "ratified",
+            "issuer",
+            "environment",
+            "valid_from",
+            "valid_until"
+          ],
+          "additionalProperties": false
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        }
+      },
+      "required": [
+        "protected",
+        "payload",
+        "signature"
+      ],
+      "additionalProperties": false
+    },
+    "certificate": {
+      "type": "object",
+      "properties": {
+        "protected": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "WHP-AUTHORITY-CERTIFICATE-v1"
+            },
+            "algorithm": {
+              "const": "Ed25519"
+            },
+            "canonicalization": {
+              "const": "WHP-JCS-I1"
+            },
+            "key_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "type",
+            "algorithm",
+            "canonicalization",
+            "key_id"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "public_key": {
+              "type": "string",
+              "maxLength": 256,
+              "description": "Canonical base64 DER SubjectPublicKeyInfo containing exactly an Ed25519 public key."
+            },
+            "subject": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "roles": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "SOURCE",
+                  "TRANSITION",
+                  "ISSUER",
+                  "REGISTRY",
+                  "DISCOVERY"
+                ]
+              },
+              "minItems": 0,
+              "maxItems": 64
+            },
+            "scopes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              },
+              "minItems": 0,
+              "maxItems": 64
+            },
+            "jurisdictions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              },
+              "minItems": 0,
+              "maxItems": 64
+            },
+            "operations": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "INFORM",
+                  "RECOMMEND",
+                  "EXECUTE"
+                ]
+              },
+              "minItems": 0,
+              "maxItems": 3,
+              "uniqueItems": true
+            },
+            "profile_hash": {
+              "const": "4244be9ed0012eaeba8e2efeb9d274ad3c1f3e188748838c191129054d24c5ab"
+            },
+            "valid_from": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "valid_until": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "public_key",
+            "subject",
+            "roles",
+            "scopes",
+            "jurisdictions",
+            "operations",
+            "profile_hash",
+            "valid_from",
+            "valid_until"
+          ],
+          "additionalProperties": false
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        }
+      },
+      "required": [
+        "protected",
+        "payload",
+        "signature"
+      ],
+      "additionalProperties": false
+    },
+    "revocation": {
+      "type": "object",
+      "properties": {
+        "protected": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "WHP-KEY-REVOCATION-v1"
+            },
+            "algorithm": {
+              "const": "Ed25519"
+            },
+            "canonicalization": {
+              "const": "WHP-JCS-I1"
+            },
+            "key_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "type",
+            "algorithm",
+            "canonicalization",
+            "key_id"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "key_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "effective_at": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          },
+          "required": [
+            "key_id",
+            "effective_at",
+            "reason"
+          ],
+          "additionalProperties": false
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        }
+      },
+      "required": [
+        "protected",
+        "payload",
+        "signature"
+      ],
+      "additionalProperties": false
+    },
+    "trust_status": {
+      "type": "object",
+      "properties": {
+        "protected": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "WHP-TRUST-STATUS-v1"
+            },
+            "algorithm": {
+              "const": "Ed25519"
+            },
+            "canonicalization": {
+              "const": "WHP-JCS-I1"
+            },
+            "key_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "type",
+            "algorithm",
+            "canonicalization",
+            "key_id"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "sequence": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "previous_hash": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "profile_authorization_hash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "certificates_hash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "revocations_hash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "valid_from": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "valid_until": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "sequence",
+            "previous_hash",
+            "profile_authorization_hash",
+            "certificates_hash",
+            "revocations_hash",
+            "valid_from",
+            "valid_until"
+          ],
+          "additionalProperties": false
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        }
+      },
+      "required": [
+        "protected",
+        "payload",
+        "signature"
+      ],
+      "additionalProperties": false
+    },
+    "trust_bundle": {
+      "type": "object",
+      "properties": {
+        "root_public_key": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "Canonical base64 DER SubjectPublicKeyInfo containing exactly an Ed25519 public key."
+        },
+        "profile_authorization": {
+          "$ref": "#/$defs/profile_authorization"
+        },
+        "certificates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/certificate"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "revocations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/revocation"
+          },
+          "minItems": 0,
+          "maxItems": 128
+        },
+        "status_snapshot": {
+          "$ref": "#/$defs/trust_status"
+        }
+      },
+      "required": [
+        "root_public_key",
+        "profile_authorization",
+        "certificates",
+        "revocations",
+        "status_snapshot"
+      ],
+      "additionalProperties": false
+    },
+    "requirements": {
+      "type": "object",
+      "properties": {
+        "scheme": {
+          "const": "exact"
+        },
+        "network": {
+          "type": "string",
+          "pattern": "^eip155:[1-9][0-9]*$"
+        },
+        "amount": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,77})$",
+          "x-whp-uint256": true
+        },
+        "asset": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}$"
+        },
+        "payTo": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}$"
+        },
+        "maxTimeoutSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300
+        },
+        "extra": {
+          "type": "object",
+          "properties": {
+            "assetTransferMethod": {
+              "const": "eip3009"
+            },
+            "paymentFlow": {
+              "const": "authorization"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          },
+          "required": [
+            "assetTransferMethod",
+            "paymentFlow",
+            "name",
+            "version"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "scheme",
+        "network",
+        "amount",
+        "asset",
+        "payTo",
+        "maxTimeoutSeconds",
+        "extra"
+      ],
+      "additionalProperties": false
+    },
+    "resource": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "mimeType": {
+          "const": "application/json"
+        }
+      },
+      "required": [
+        "url",
+        "description",
+        "mimeType"
+      ],
+      "additionalProperties": false
+    },
+    "quote": {
+      "type": "object",
+      "properties": {
+        "protected": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "WHP-STANDING-QUOTE-v1"
+            },
+            "algorithm": {
+              "const": "Ed25519"
+            },
+            "canonicalization": {
+              "const": "WHP-JCS-I1"
+            },
+            "key_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "type",
+            "algorithm",
+            "canonicalization",
+            "key_id"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "purchase_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "request_hash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "buyer_key": {
+              "type": "string",
+              "maxLength": 256,
+              "description": "Canonical base64 DER SubjectPublicKeyInfo containing exactly an Ed25519 public key."
+            },
+            "profile_hash": {
+              "const": "4244be9ed0012eaeba8e2efeb9d274ad3c1f3e188748838c191129054d24c5ab"
+            },
+            "issuer": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "environment": {
+              "enum": [
+                "TEST",
+                "LIVE"
+              ]
+            },
+            "issued_at": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "expires_at": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "resource": {
+              "$ref": "#/$defs/resource"
+            },
+            "payment_requirements": {
+              "$ref": "#/$defs/requirements"
+            },
+            "charge_policy": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          },
+          "required": [
+            "purchase_id",
+            "request_hash",
+            "buyer_key",
+            "profile_hash",
+            "issuer",
+            "environment",
+            "issued_at",
+            "expires_at",
+            "resource",
+            "payment_requirements",
+            "charge_policy"
+          ],
+          "additionalProperties": false
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        }
+      },
+      "required": [
+        "protected",
+        "payload",
+        "signature"
+      ],
+      "additionalProperties": false
+    },
+    "payment": {
+      "type": "object",
+      "properties": {
+        "x402Version": {
+          "const": 2
+        },
+        "resource": {
+          "$ref": "#/$defs/resource"
+        },
+        "accepted": {
+          "$ref": "#/$defs/requirements"
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "signature": {
+              "type": "string",
+              "pattern": "^0x[0-9a-fA-F]{128}(00|01|1[bBcC])$"
+            },
+            "authorization": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": "string",
+                  "pattern": "^0x[0-9a-fA-F]{40}$"
+                },
+                "to": {
+                  "type": "string",
+                  "pattern": "^0x[0-9a-fA-F]{40}$"
+                },
+                "value": {
+                  "type": "string",
+                  "pattern": "^(0|[1-9][0-9]{0,77})$",
+                  "x-whp-uint256": true
+                },
+                "validAfter": {
+                  "type": "string",
+                  "pattern": "^(0|[1-9][0-9]{0,77})$",
+                  "x-whp-uint256": true
+                },
+                "validBefore": {
+                  "type": "string",
+                  "pattern": "^(0|[1-9][0-9]{0,77})$",
+                  "x-whp-uint256": true
+                },
+                "nonce": {
+                  "type": "string",
+                  "pattern": "^0x[0-9a-fA-F]{64}$"
+                }
+              },
+              "required": [
+                "from",
+                "to",
+                "value",
+                "validAfter",
+                "validBefore",
+                "nonce"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "signature",
+            "authorization"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "x402Version",
+        "resource",
+        "accepted",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "components": {
+      "type": "object",
+      "properties": {
+        "SOURCE": {
+          "enum": [
+            "ESTABLISHED",
+            "NOT_ESTABLISHED",
+            "NOT_ASSESSED"
+          ]
+        },
+        "CONTEXT": {
+          "enum": [
+            "ESTABLISHED",
+            "NOT_ESTABLISHED",
+            "NOT_ASSESSED"
+          ]
+        },
+        "RELATION": {
+          "enum": [
+            "ESTABLISHED",
+            "NOT_ESTABLISHED",
+            "NOT_ASSESSED"
+          ]
+        },
+        "PASSAGE": {
+          "enum": [
+            "ESTABLISHED",
+            "NOT_ESTABLISHED",
+            "NOT_ASSESSED"
+          ]
+        },
+        "UNKNOWN": {
+          "enum": [
+            "ESTABLISHED",
+            "NOT_ESTABLISHED",
+            "NOT_ASSESSED"
+          ]
+        },
+        "CONTINUITY": {
+          "enum": [
+            "ESTABLISHED",
+            "NOT_ESTABLISHED",
+            "NOT_ASSESSED"
+          ]
+        },
+        "ACTION_BOUNDARY": {
+          "enum": [
+            "ESTABLISHED",
+            "NOT_ESTABLISHED",
+            "NOT_ASSESSED"
+          ]
+        }
+      },
+      "required": [
+        "SOURCE",
+        "CONTEXT",
+        "RELATION",
+        "PASSAGE",
+        "UNKNOWN",
+        "CONTINUITY",
+        "ACTION_BOUNDARY"
+      ],
+      "additionalProperties": false
+    },
+    "check": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "rule": {
+              "const": "SOURCE_IDENTITY"
+            },
+            "object": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "passed": {
+              "type": "boolean"
+            },
+            "detail": {
+              "const": "Root hash, identifier and version must identify the same submitted object."
+            }
+          },
+          "required": [
+            "rule",
+            "object",
+            "passed",
+            "detail"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "rule": {
+              "const": "ASSESSMENT_TIME"
+            },
+            "object": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "passed": {
+              "type": "boolean"
+            },
+            "detail": {
+              "const": "The assessment must fall within the requested time window."
+            }
+          },
+          "required": [
+            "rule",
+            "object",
+            "passed",
+            "detail"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "rule": {
+              "const": "SOURCE_AUTHORITY"
+            },
+            "object": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "passed": {
+              "type": "boolean"
+            },
+            "detail": {
+              "const": "An admitted source key must attest within its signed scope, operations and validity."
+            }
+          },
+          "required": [
+            "rule",
+            "object",
+            "passed",
+            "detail"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "rule": {
+              "const": "SOURCE_ACTIVE"
+            },
+            "object": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "passed": {
+              "type": "boolean"
+            },
+            "detail": {
+              "const": "Non-active source versions cannot carry operative standing in this profile."
+            }
+          },
+          "required": [
+            "rule",
+            "object",
+            "passed",
+            "detail"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "rule": {
+              "const": "SOURCE_BOUNDS"
+            },
+            "object": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "passed": {
+              "type": "boolean"
+            },
+            "detail": {
+              "const": "Source jurisdiction and scope must match the requested bounds exactly."
+            }
+          },
+          "required": [
+            "rule",
+            "object",
+            "passed",
+            "detail"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "rule": {
+              "const": "SOURCE_TIME"
+            },
+            "object": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "passed": {
+              "type": "boolean"
+            },
+            "detail": {
+              "const": "Source validity must contain the requested time window."
+            }
+          },
+          "required": [
+            "rule",
+            "object",
+            "passed",
+            "detail"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "rule": {
+              "const": "GRAPH_CLOSURE"
+            },
+            "object": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "passed": {
+              "type": "boolean"
+            },
+            "detail": {
+              "const": "Every submitted source must be connected to the root; cycles and missing references are forbidden."
+            }
+          },
+          "required": [
+            "rule",
+            "object",
+            "passed",
+            "detail"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "rule": {
+              "const": "TRANSITION_AUTHORITY"
+            },
+            "object": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "passed": {
+              "type": "boolean"
+            },
+            "detail": {
+              "const": "A separately admitted transition authority must sign the exact passage."
+            }
+          },
+          "required": [
+            "rule",
+            "object",
+            "passed",
+            "detail"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "rule": {
+              "const": "TRANSITION_BOUNDS"
+            },
+            "object": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "passed": {
+              "type": "boolean"
+            },
+            "detail": {
+              "const": "The warrant must contain the requested temporal and jurisdictional bounds."
+            }
+          },
+          "required": [
+            "rule",
+            "object",
+            "passed",
+            "detail"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "rule": {
+              "const": "WARRANT_EVIDENCE"
+            },
+            "object": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "passed": {
+              "type": "boolean"
+            },
+            "detail": {
+              "const": "The signed warrant must name inspectable evidence in the submitted graph."
+            }
+          },
+          "required": [
+            "rule",
+            "object",
+            "passed",
+            "detail"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "rule": {
+              "const": "TRANSITION_REFERENCES"
+            },
+            "object": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "passed": {
+              "type": "boolean"
+            },
+            "detail": {
+              "const": "Unknown source or target hash."
+            }
+          },
+          "required": [
+            "rule",
+            "object",
+            "passed",
+            "detail"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "rule": {
+              "const": "EXACT_TRANSFORMATION"
+            },
+            "object": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "passed": {
+              "type": "boolean"
+            },
+            "detail": {
+              "const": "COPY preserves content and epistemic status. COMPOSE retains distinct hash-addressed members without fusion."
+            }
+          },
+          "required": [
+            "rule",
+            "object",
+            "passed",
+            "detail"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "rule": {
+              "const": "QUALIFIERS_PRESERVED"
+            },
+            "object": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "passed": {
+              "type": "boolean"
+            },
+            "detail": {
+              "const": "All source qualifiers must survive unchanged; this profile permits no waiver."
+            }
+          },
+          "required": [
+            "rule",
+            "object",
+            "passed",
+            "detail"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "rule": {
+              "const": "UNKNOWNS_PRESERVED"
+            },
+            "object": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "passed": {
+              "type": "boolean"
+            },
+            "detail": {
+              "const": "Unknowns, their descriptions and blocked operations must survive unchanged."
+            }
+          },
+          "required": [
+            "rule",
+            "object",
+            "passed",
+            "detail"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "rule": {
+              "const": "NO_FORCE_ESCALATION"
+            },
+            "object": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "passed": {
+              "type": "boolean"
+            },
+            "detail": {
+              "const": "No target operation may exceed its parents or the exact transition grant."
+            }
+          },
+          "required": [
+            "rule",
+            "object",
+            "passed",
+            "detail"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "rule": {
+              "const": "REQUESTED_OPERATION"
+            },
+            "object": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "passed": {
+              "type": "boolean"
+            },
+            "detail": {
+              "const": "The requested operation must survive every source, warrant and unresolved blocking unknown."
+            }
+          },
+          "required": [
+            "rule",
+            "object",
+            "passed",
+            "detail"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "decision": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "const": "WHP-STANDING-DECISION-v1"
+        },
+        "evaluated_at": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "submission_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "object": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "root": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "id",
+            "version",
+            "root"
+          ],
+          "additionalProperties": false
+        },
+        "profile": {
+          "$ref": "#/$defs/profile_ref"
+        },
+        "bounds": {
+          "type": "object",
+          "properties": {
+            "scope": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "jurisdiction": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "valid_from": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "valid_until": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "scope",
+            "jurisdiction",
+            "valid_from",
+            "valid_until"
+          ],
+          "additionalProperties": false
+        },
+        "requested_operation": {
+          "enum": [
+            "INFORM",
+            "RECOMMEND",
+            "EXECUTE"
+          ]
+        },
+        "outcome": {
+          "enum": [
+            "ESTABLISHED",
+            "NOT_ESTABLISHED"
+          ]
+        },
+        "permitted_operations": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "INFORM",
+              "RECOMMEND",
+              "EXECUTE"
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 3,
+          "uniqueItems": true
+        },
+        "components": {
+          "$ref": "#/$defs/components"
+        },
+        "effective_at": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "expires_at": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/check"
+          },
+          "minItems": 0,
+          "maxItems": 1024
+        },
+        "unknowns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "source_hash": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "unknowns": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/unknown"
+                },
+                "minItems": 0,
+                "maxItems": 64,
+                "uniqueItems": true,
+                "x-whp-unique-key": "id"
+              }
+            },
+            "required": [
+              "source_hash",
+              "unknowns"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0,
+          "maxItems": 64
+        },
+        "assessment_boundary": {
+          "const": "Exact submitted signed JSON artifacts and COPY/COMPOSE transitions under admitted authority certificates. Relations assessed here are only the declared COPY and COMPOSE relations."
+        },
+        "not_assessed": {
+          "const": [
+            "Substantive truth of source assertions",
+            "Authenticity of an external locator beyond the admitted signer's attestation",
+            "Completeness of evidence outside the submitted graph",
+            "General natural-language inference",
+            "Execution or behavior of a submitted external workflow",
+            "External legal or domain authority",
+            "Legal compliance, safety or universal truth",
+            "Continuity of versions outside the submitted graph"
+          ]
+        },
+        "review_triggers": {
+          "const": [
+            "Assessed object or version changes",
+            "Source or authority withdrawal, correction, dispute or expiry",
+            "Profile or governing conditions change"
+          ]
+        }
+      },
+      "required": [
+        "version",
+        "evaluated_at",
+        "submission_hash",
+        "object",
+        "profile",
+        "bounds",
+        "requested_operation",
+        "outcome",
+        "permitted_operations",
+        "components",
+        "effective_at",
+        "expires_at",
+        "checks",
+        "unknowns",
+        "assessment_boundary",
+        "not_assessed",
+        "review_triggers"
+      ],
+      "additionalProperties": false
+    },
+    "settlement_test": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "const": "WHP-TEST-SETTLEMENT-EVIDENCE-v1"
+        },
+        "environment": {
+          "const": "TEST"
+        },
+        "network": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "asset": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}$"
+        },
+        "payer": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}$"
+        },
+        "pay_to": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}$"
+        },
+        "amount": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,77})$",
+          "x-whp-uint256": true
+        },
+        "nonce": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{64}$"
+        },
+        "transaction": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{64}$"
+        },
+        "block_number": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "block_hash": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{64}$"
+        },
+        "finality": {
+          "const": "SIMULATED_NOT_LIVE"
+        },
+        "observed_at": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "verification_boundary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      },
+      "required": [
+        "version",
+        "environment",
+        "network",
+        "asset",
+        "payer",
+        "pay_to",
+        "amount",
+        "nonce",
+        "transaction",
+        "block_number",
+        "block_hash",
+        "finality",
+        "observed_at",
+        "verification_boundary"
+      ],
+      "additionalProperties": false
+    },
+    "settlement_live": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "const": "WHP-EIP3009-SETTLEMENT-EVIDENCE-v1"
+        },
+        "environment": {
+          "const": "LIVE"
+        },
+        "network": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "asset": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}$"
+        },
+        "payer": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}$"
+        },
+        "pay_to": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}$"
+        },
+        "amount": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,77})$",
+          "x-whp-uint256": true
+        },
+        "nonce": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{64}$"
+        },
+        "transaction": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{64}$"
+        },
+        "block_number": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "block_hash": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{64}$"
+        },
+        "finality": {
+          "const": "finalized"
+        },
+        "observed_at": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "verification_boundary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "finalized_head": {
+          "type": "object",
+          "properties": {
+            "number": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "hash": {
+              "type": "string",
+              "pattern": "^0x[0-9a-fA-F]{64}$"
+            }
+          },
+          "required": [
+            "number",
+            "hash"
+          ],
+          "additionalProperties": false
+        },
+        "authorization_log": {
+          "$ref": "#/$defs/value"
+        },
+        "transfer_log": {
+          "$ref": "#/$defs/value"
+        },
+        "transaction_input": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      },
+      "required": [
+        "version",
+        "environment",
+        "network",
+        "asset",
+        "payer",
+        "pay_to",
+        "amount",
+        "nonce",
+        "transaction",
+        "block_number",
+        "block_hash",
+        "finality",
+        "observed_at",
+        "verification_boundary",
+        "finalized_head",
+        "authorization_log",
+        "transfer_log",
+        "transaction_input"
+      ],
+      "additionalProperties": false
+    },
+    "commerce": {
+      "type": "object",
+      "properties": {
+        "quote": {
+          "$ref": "#/$defs/quote"
+        },
+        "payment_identity": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "payment_payload": {
+          "$ref": "#/$defs/payment"
+        },
+        "settlement": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/settlement_test"
+            },
+            {
+              "$ref": "#/$defs/settlement_live"
+            }
+          ]
+        },
+        "assessment_paid_by": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}$"
+        },
+        "relationship": {
+          "enum": [
+            "Simulated buyer and test issuer only. No Wheeler Hubbell Publishing sale or real funds transfer occurred.",
+            "The buyer pays Wheeler Hubbell Publishing for assessment. Payment does not determine the assessment outcome."
+          ]
+        },
+        "assessor": {
+          "const": "WHP Standing deterministic Structured Passage evaluator 1.0.0"
+        }
+      },
+      "required": [
+        "quote",
+        "payment_identity",
+        "payment_payload",
+        "settlement",
+        "assessment_paid_by",
+        "relationship",
+        "assessor"
+      ],
+      "additionalProperties": false
+    },
+    "result_payload": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "const": "WHP-STANDING-RESULT-v1"
+        },
+        "environment": {
+          "enum": [
+            "TEST",
+            "LIVE"
+          ]
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "issuer_key_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "purchase_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "mark_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^WHP-SM-[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "issued_at": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "effective_at": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "expires_at": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "object": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "root": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "id",
+            "version",
+            "root"
+          ],
+          "additionalProperties": false
+        },
+        "profile": {
+          "const": {
+            "id": "WHP-STANDING-STRUCTURED-PASSAGE",
+            "version": "1.0.0",
+            "implementation_status": "PUBLIC_V1_REQUIRES_EXPLICIT_ISSUER_RATIFICATION",
+            "title": "Structured provenance and passage integrity",
+            "operations": [
+              "INFORM",
+              "RECOMMEND",
+              "EXECUTE"
+            ],
+            "transforms": [
+              "COPY",
+              "COMPOSE"
+            ],
+            "criteria": [
+              "SOURCE_SIGNATURE_AND_IDENTITY",
+              "TRUSTED_SCOPED_AUTHORITY",
+              "CONNECTED_ACYCLIC_GRAPH",
+              "EXACT_CONTENT_TRANSFORMATION",
+              "QUALIFIERS_PRESERVED",
+              "UNKNOWNS_PRESERVED",
+              "EXPLICIT_TRANSITION_WARRANT",
+              "OPERATION_NOT_ESCALATED",
+              "TEMPORAL_INTERSECTION",
+              "JURISDICTION_AND_SCOPE"
+            ],
+            "marks": [
+              "SOURCE",
+              "CONTEXT",
+              "RELATION",
+              "PASSAGE",
+              "UNKNOWN"
+            ],
+            "assessed": "Exact submitted signed JSON artifacts and COPY/COMPOSE transitions under admitted authority certificates. Relations assessed here are only the declared COPY and COMPOSE relations.",
+            "not_assessed": [
+              "Substantive truth of source assertions",
+              "Authenticity of an external locator beyond the admitted signer's attestation",
+              "Completeness of evidence outside the submitted graph",
+              "General natural-language inference",
+              "Execution or behavior of a submitted external workflow",
+              "External legal or domain authority",
+              "Legal compliance, safety or universal truth",
+              "Continuity of versions outside the submitted graph"
+            ],
+            "max_validity_seconds": 86400,
+            "review_triggers": [
+              "Assessed object or version changes",
+              "Source or authority withdrawal, correction, dispute or expiry",
+              "Profile or governing conditions change"
+            ],
+            "failure_outcome": "Signed assessment record; no Standing Mark",
+            "payment_policy": "Payment purchases an evaluation, never a favorable result. Identical purchase recovery does not create a new payment authorization."
+          }
+        },
+        "profile_authorization": {
+          "$ref": "#/$defs/profile_authorization"
+        },
+        "authority": {
+          "$ref": "#/$defs/trust_bundle"
+        },
+        "submission": {
+          "$ref": "#/$defs/submission"
+        },
+        "submission_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "decision_record": {
+          "$ref": "#/$defs/decision"
+        },
+        "decision_record_ref": {
+          "type": "string",
+          "pattern": "^urn:sha256:[0-9a-f]{64}$"
+        },
+        "standing": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "operation": {
+                  "enum": [
+                    "INFORM",
+                    "RECOMMEND",
+                    "EXECUTE"
+                  ]
+                },
+                "components": {
+                  "$ref": "#/$defs/components"
+                },
+                "bounds": {
+                  "type": "object",
+                  "properties": {
+                    "scope": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "jurisdiction": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "valid_from": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "valid_until": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "scope",
+                    "jurisdiction",
+                    "valid_from",
+                    "valid_until"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "operation",
+                "components",
+                "bounds"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "commerce": {
+          "$ref": "#/$defs/commerce"
+        },
+        "retrieval": {
+          "type": "object",
+          "properties": {
+            "purchase_path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "result_path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "registry_path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "authentication": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "additional_charge": {
+              "const": false
+            }
+          },
+          "required": [
+            "purchase_path",
+            "result_path",
+            "registry_path",
+            "authentication",
+            "additional_charge"
+          ],
+          "additionalProperties": false
+        },
+        "limitations": {
+          "const": [
+            "Substantive truth of source assertions",
+            "Authenticity of an external locator beyond the admitted signer's attestation",
+            "Completeness of evidence outside the submitted graph",
+            "General natural-language inference",
+            "Execution or behavior of a submitted external workflow",
+            "External legal or domain authority",
+            "Legal compliance, safety or universal truth",
+            "Continuity of versions outside the submitted graph"
+          ]
+        },
+        "current_status_rule": {
+          "const": "This immutable record proves issuance-time assessment. Current standing requires a fresh signed registry response and current trust/revocation information."
+        },
+        "discovery": {
+          "$ref": "#/$defs/discovery_identity"
+        },
+        "protocol": {
+          "$ref": "#/$defs/protocol"
+        }
+      },
+      "required": [
+        "version",
+        "environment",
+        "issuer",
+        "issuer_key_id",
+        "purchase_id",
+        "mark_id",
+        "issued_at",
+        "effective_at",
+        "expires_at",
+        "object",
+        "profile",
+        "profile_authorization",
+        "authority",
+        "submission",
+        "submission_hash",
+        "decision_record",
+        "decision_record_ref",
+        "standing",
+        "commerce",
+        "retrieval",
+        "limitations",
+        "current_status_rule",
+        "discovery",
+        "protocol"
+      ],
+      "additionalProperties": false
+    },
+    "contract_document": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "const": "urn:whp:standing:mark-contract:1"
+        },
+        "public_version": {
+          "const": "1"
+        },
+        "artifact_types": {
+          "const": {
+            "positive": "WHP-STANDING-MARK-v1",
+            "negative": "WHP-STANDING-ASSESSMENT-v1",
+            "positive_name": "WHP Standing Mark v1",
+            "negative_name": "WHP Standing Assessment v1"
+          }
+        },
+        "result_version": {
+          "const": "WHP-STANDING-RESULT-v1"
+        },
+        "canonicalization": {
+          "const": {
+            "id": "WHP-JCS-I1",
+            "key_order": "UTF16_CODE_UNITS",
+            "encoding": "UTF-8",
+            "numbers": "SAFE_INTEGER_TOKENS_ONLY_NO_NEGATIVE_ZERO",
+            "array_order": "PRESERVED",
+            "unicode_normalization": "NONE",
+            "duplicate_keys": "REJECT",
+            "unknown_semantic_fields": "REJECT",
+            "max_depth": 64
+          }
+        },
+        "envelope": {
+          "const": {
+            "fields": [
+              "protected",
+              "payload",
+              "signature"
+            ],
+            "protected_fields": [
+              "type",
+              "algorithm",
+              "canonicalization",
+              "key_id"
+            ],
+            "signed_fields": [
+              "protected",
+              "payload"
+            ],
+            "algorithm": "Ed25519",
+            "key_id": "SHA256-SPKI-DER"
+          }
+        },
+        "meaning": {
+          "const": {
+            "issuer": "/payload/issuer",
+            "artifact_id": "/payload/mark_id",
+            "determination": "/payload/decision_record/outcome",
+            "establishes": "/payload/decision_record/assessment_boundary",
+            "does_not_establish": "/payload/limitations",
+            "components": "/payload/decision_record/components",
+            "operation": "/payload/submission/requested_operation",
+            "object": "/payload/object",
+            "bounds": "/payload/submission/bounds",
+            "provenance": "/payload/submission",
+            "qualifications": "/payload/submission/nodes",
+            "unknowns": "/payload/decision_record/unknowns",
+            "authority": "/payload/authority",
+            "issued_at": "/payload/issued_at",
+            "effective_at": "/payload/effective_at",
+            "expires_at": "/payload/expires_at"
+          }
+        },
+        "bootstrap": {
+          "const": {
+            "identity_pointer": "/payload/discovery",
+            "authority_pointer": "/payload/authority",
+            "profile_pointer": "/payload/profile",
+            "authorization_pointer": "/payload/profile_authorization",
+            "purchase_id_pointer": "/payload/purchase_id",
+            "certificate_type": "WHP-AUTHORITY-CERTIFICATE-v1",
+            "authorization_type": "WHP-PROFILE-AUTHORIZATION-v1",
+            "resolution_type": "WHP-CAPABILITY-RESOLUTION-v1",
+            "resolution_role": "DISCOVERY",
+            "registry_type": "WHP-REGISTRY-SNAPSHOT-v1",
+            "verifier_arguments": [
+              "{mark}",
+              "--root-pin",
+              "{root_pin}",
+              "--registry",
+              "{registry}",
+              "--resolution",
+              "{resolution}"
+            ],
+            "test_arguments": [
+              "--allow-test"
+            ],
+            "root_admission": "Embedded root self-consistency is not institutional authentication. TEST never establishes LIVE authority.",
+            "trust_status_type": "WHP-TRUST-STATUS-v1",
+            "revocation_type": "WHP-KEY-REVOCATION-v1",
+            "resolution_arguments": [
+              "{resolution}",
+              "--resolution-only",
+              "--contract",
+              "{contract}",
+              "--root-pin",
+              "{root_pin}"
+            ]
+          }
+        },
+        "profile": {
+          "const": {
+            "id": "WHP-STANDING-STRUCTURED-PASSAGE",
+            "version": "1.0.0",
+            "sha256": "4244be9ed0012eaeba8e2efeb9d274ad3c1f3e188748838c191129054d24c5ab"
+          }
+        },
+        "status_rule": {
+          "const": "Historical issuance verification never implies current standing. A fresh independent signed registry check is required."
+        },
+        "discovery_rule": {
+          "const": "An immutable capability/resolution identity locates a separately signed current service. Current service metadata never rewrites historical meaning."
+        },
+        "schema_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "id",
+        "public_version",
+        "artifact_types",
+        "result_version",
+        "canonicalization",
+        "envelope",
+        "meaning",
+        "bootstrap",
+        "profile",
+        "status_rule",
+        "discovery_rule",
+        "schema_sha256"
+      ],
+      "additionalProperties": false
+    },
+    "protocol": {
+      "type": "object",
+      "properties": {
+        "document": {
+          "$ref": "#/$defs/contract_document"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "verifier_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "document",
+        "sha256",
+        "verifier_sha256"
+      ],
+      "additionalProperties": false
+    },
+    "discovery_identity": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "const": "WHP-STANDING-DISCOVERY-IDENTITY-v1"
+        },
+        "capability_id": {
+          "const": "urn:whp:standing:capability:1"
+        },
+        "capability_class": {
+          "const": "urn:capability:machine-verifiable-standing:1"
+        },
+        "resolution_id": {
+          "const": "urn:whp:standing:resolution:1"
+        },
+        "resolution_url": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "root_key_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "status_id": {
+          "type": "string",
+          "pattern": "^urn:whp:standing:status:[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "version",
+        "capability_id",
+        "capability_class",
+        "resolution_id",
+        "resolution_url",
+        "root_key_id",
+        "status_id"
+      ],
+      "additionalProperties": false
+    },
+    "mark": {
+      "type": "object",
+      "properties": {
+        "protected": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "WHP-STANDING-MARK-v1"
+            },
+            "algorithm": {
+              "const": "Ed25519"
+            },
+            "canonicalization": {
+              "const": "WHP-JCS-I1"
+            },
+            "key_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "type",
+            "algorithm",
+            "canonicalization",
+            "key_id"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "$ref": "#/$defs/result_payload"
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        }
+      },
+      "required": [
+        "protected",
+        "payload",
+        "signature"
+      ],
+      "additionalProperties": false
+    },
+    "assessment": {
+      "type": "object",
+      "properties": {
+        "protected": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "WHP-STANDING-ASSESSMENT-v1"
+            },
+            "algorithm": {
+              "const": "Ed25519"
+            },
+            "canonicalization": {
+              "const": "WHP-JCS-I1"
+            },
+            "key_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "type",
+            "algorithm",
+            "canonicalization",
+            "key_id"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "$ref": "#/$defs/result_payload"
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        }
+      },
+      "required": [
+        "protected",
+        "payload",
+        "signature"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/mark"
+    },
+    {
+      "$ref": "#/$defs/assessment"
+    }
+  ],
+  "x-whp-canonicalization": "WHP-JCS-I1",
+  "x-whp-cross-field-constraints": "See docs/FIRST-PUBLIC-V1.md; signatures, dates, graph closure, binding, authority and issuance conditions require semantic verification."
+}

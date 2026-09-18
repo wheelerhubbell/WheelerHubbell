@@ -1,0 +1,33 @@
+name: Open acquisition release gate
+on:
+  pull_request:
+  push:
+    branches: [main, repair/open-recursive-acquisition]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  full-cold-chain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci --ignore-scripts
+      - run: python3 -m pip install -r requirements-verification.txt
+      - name: Full A-to-B acquisition, independent verification and recovery
+        run: npm run check:open-acquisition
+      - name: Preserve exact execution evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-acquisition-test-evidence
+          path: evidence/open-acquisition
+          if-no-files-found: error

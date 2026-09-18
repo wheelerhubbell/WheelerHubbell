@@ -1,0 +1,8 @@
+{
+  "interface": "capability-catalog-v1",
+  "providers": [],
+  "self_description_path": "/discovery/capability.json",
+  "runtime_provider_index_path": "/discovery/provider-index.json",
+  "static_file_is_not_current_service_resolution": true,
+  "external_registration_established": false
+}
